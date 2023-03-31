@@ -1,4 +1,7 @@
-## Arquivo main para testar os modelos dos conversores
+"""
+Arquivo main para testar códigos dos modelos dos conversores
+Trabalho Futuro - Refatorar implementando TDD
+"""
 
 import conversores_cc_basicos
 
