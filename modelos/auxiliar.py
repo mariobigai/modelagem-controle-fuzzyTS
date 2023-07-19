@@ -3,10 +3,8 @@ Módulo auxiliar da biblioteca control
 
 Trabalho Futuro - Refatorar de acordo com as convençoes da biblioteca, usando herança e polimorfismo
 """
-
-import scipy as sp              # SciPy library (used all over)
 import numpy as np              # NumPy library
-from scipy.signal.ltisys import _default_response_times
+
 # Helper function for checking array-like parameters
 def _check_convert_array(in_obj, legal_shapes, err_msg_start, squeeze=False,
                          transpose=False):
