@@ -7,6 +7,7 @@ from modelos import conversores_cc_basicos
 import numpy as np
 import pandas as pd
 
+<<<<<<< HEAD
 conversor = conversores_cc_basicos.Boost_ideal(50, 20e-6, 5e-3, 100)
 
 T = np.arange(0,0.1,1e-5)
@@ -43,10 +44,6 @@ tensao_saida = tensao_saida.transpose()
 tempo = tempo[0][0:-1:10]
 corrente_indutor = corrente_indutor[0][0:-1:10]
 tensao_saida = tensao_saida[0][0:-1:10]
-
-#print(tempo.shape, T.shape)
-#print(tensao_saida.shape, ys_TS[0].shape)
-#print(corrente_indutor.shape, ys_TS[1].shape)
 
 Vo_t = []
 il_t = []
