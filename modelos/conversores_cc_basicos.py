@@ -3,7 +3,7 @@ from modelos import auxiliar
 import numpy as np
 import scipy as sp
 
-class Buck_Boost_ideal:
+class Buck_Boost_ideal_saida:
     def __init__(self, R, C, L, Vin):
         self._R = R
         self._C = C
@@ -158,7 +158,7 @@ class Buck_Boost_ideal:
         return yout
 
 
-class Boost_ideal:
+class Boost_ideal_saida:
     def __init__(self, R, C, L, Vin):
         self._R = R
         self._C = C

@@ -7,7 +7,7 @@ from modelos import conversores_cc_basicos
 import numpy as np
 import pandas as pd
 
-conversor = conversores_cc_basicos.Boost_ideal(50, 150e-6, 50e-3, 100)
+conversor = conversores_cc_basicos.Boost_ideal_saida(50, 150e-6, 50e-3, 100)
 
 T = np.arange(0,0.5,0.00001)
 U = np.ones_like(T)
