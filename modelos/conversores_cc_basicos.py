@@ -189,8 +189,8 @@ class Boost_ideal_saida:
         Vc_max = self._Vin/(1-d_max)
 
         #Máximos e mínimos de f12
-        a121 = -1/self._L + self._Vin/(self._L*Vc_min)
-        a122 = -1/self._L + self._Vin/(self._L*Vc_max)
+        a121 = -1/self._L + self._Vin/(self._L*Vc_max)
+        a122 = -1/self._L + self._Vin/(self._L*Vc_min)
         print(a121, a122)
 
         # Máximos e mínimos de g11
