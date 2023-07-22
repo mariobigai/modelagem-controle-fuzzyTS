@@ -340,3 +340,230 @@ class Boost_ideal_saida:
             yout = np.dot(C, xout) + np.dot(E, U)
 
         return yout
+
+class Buck_ideal_entrada:
+    def __init__(self, Vo, L, C, Iin, Rp):
+        self._Vo = Vo
+        self._C = C
+        self._L = L
+        self._Iin = Iin
+        self._Rp = Rp
+    def forced_response_TS(self, d_t, d_min, d_max, T=None, U=0., X0=0., transpose=False, interpolate=False, return_x=None, squeeze=None):
+
+        """
+        Método para gerar a resposta em malha aberta do modelo TS do Buck-Boost operando em várias regiões de operação
+
+        :param D_t: Regiões de opeação (Duty-cycle)
+        :param T: Tempo de simulação
+        :param U: Entrada do sistema
+        :param X0: (Biblioteca control)
+        :param transpose: (Biblioteca control)
+        :param interpolate: (Biblioteca control)
+        :param return_x: (Biblioteca control)
+        :param squeeze: (Biblioteca control)
+        :return: Resultado da simulação: x, y
+        """
+        # Região mínima de operação
+        Il_min = self._Iin/d_min - self._Vo/(pow(d_min,2)*self._Rp)
+        Vcin_min = self._Vo/d_min
+
+        # Região máxima de operação
+        Il_max = self._Iin/d_max - self._Vo/(pow(d_max, 2)*self._Rp)
+        Vcin_max = self._Vo/d_max
+
+        # Máximos e mínimos aplicados a f12
+        if Vcin_max == 0:
+            a121 = -self._Vo/(self._L*0.01)
+        else:
+            a121 = -self._Vo/(self._L*Vcin_max)
+        if Vcin_min == 0:
+            a122 = -self._Vo/(self._L*0.01)
+        else:
+            a122 = -self._Vo/(self._L*Vcin_min)
+        print(a121, a122)
+
+        # Máximos e mínimos aplicados a f21
+        if Il_max == 0:
+            a211 = self._Iin/(self._C*0.01)
+        else:
+            a211 = self._Iin/(self._C*Il_max)
+        if Il_min == 0:
+            a212 = -self._Iin/(self._L*0.01)
+        else:
+            a212 = -self._Iin/(self._L*Il_min)
+        print(a211, a212)
+
+        # Máximos e mínimos aplicados a g11
+        b111 = Vcin_max/self._L
+        b112 = Vcin_min/self._L
+        print(b111, b112)
+
+        # Máximos e mínimos aplicados a g12
+        b211 = -Il_max/self._C
+        b212 = -Il_min/self._C
+        print(b211, b212)
+
+        # Modelos Lineares Locais
+        A1 = np.array([[0, a121], [a211, -1/(self._Rp*self._C)]])
+        A5 = A1; A9 = A1; A13 = A1
+
+        A2 = np.array([[0, a121], [a212, -1/(self._Rp*self._C)]])
+        A6 = A2; A10 = A2; A14 = A2
+
+        A3 = np.array([[0, a122], [a211, -1/(self._Rp * self._C)]])
+        A7 = A3; A11 = A3; A15 = A3
+
+        A4 = np.array([[0, a122], [a212, -1/(self._Rp * self._C)]])
+        A8 = A4; A12 = A4; A16 = A4
+
+        B1 = np.array([[b111], [b211]])
+        B2=B1; B3=B1; B4=B1
+
+        B5 = np.array([[b111], [b212]])
+        B6 = B5; B7 = B5; B8 = B5
+
+        B9 = np.array([[b112], [b211]])
+        B10 = B9; B11 = B9; B12 = B9
+
+        B13 = np.array([[b112], [b212]])
+        B14 = B13; B15 = B13; B16 = B13
+
+        #Considerando inicialmente alpha16=1 demais = 0
+        A_TS = A16
+        B_TS = B16
+        C_TS = np.array([[0, 1], [1, 0]])
+        E_TS = np.array([[0], [0]])
+        SS_TS = ctr.StateSpace(A_TS, B_TS, C_TS, E_TS)
+
+        # Pega as matrizes de estado
+        A, B, C, E = np.asarray(SS_TS.A), np.asarray(SS_TS.B), np.asarray(SS_TS.C), np.asarray(SS_TS.D)
+
+        ## ------------------------------------------------------------------------------------------------------------
+        # Verificações
+
+        # Numero de estados
+        n_states = A.shape[0]
+
+        # Numero de Entradas
+        n_inputs = B.shape[1]
+
+        # Numero de Saídas
+        n_outputs = C.shape[0]
+
+        # Converte as entradas e tempo de simulação em numpy arrays
+        if U is not None:
+            U = np.asarray(U)  # cria array de entrada
+        if T is not None:
+            T = np.asarray(T)  # cria array de tempo
+
+        # Garante que U e T tem o mesmo tamanho
+        if (U.ndim == 1 and U.shape[0] != T.shape[0]) or \
+                (U.ndim > 1 and U.shape[1] != T.shape[0]):
+            ValueError('Pamameter ``T`` must have same elements as'
+                       ' the number of columns in input array ``U``')
+
+        # Erro se T é nulo
+        if T is None:
+            raise ValueError('Parameter ``T``: must be array-like, and contain '
+                             '(strictly monotonic) increasing numbers.')
+
+        # Verifica e atribui o T no formato correto
+        T = auxiliar._check_convert_array(T, [('any',), (1, 'any')], 'Parameter ``T``: ', squeeze=True,
+                                          transpose=transpose)
+
+        dt = T[1] - T[0]  # Passo de simulação
+
+        # Erro se T não for igualmente espaçado - Fixed-step size
+        if not np.allclose(T[1:] - T[:-1], dt):
+            raise ValueError("Parameter ``T``: time values must be "
+                             "equally spaced.")
+
+        n_steps = T.shape[0]  # número de passos de simulação
+
+        # Cria vetor X0 se não for dado e testa se está no formato correto
+        X0 = auxiliar._check_convert_array(X0, [(n_states,), (n_states, 1)], 'Parameter ``X0``: ', squeeze=True)
+
+        xout = np.zeros((n_states, n_steps))
+        xout[:, 0] = X0
+        yout = np.zeros((n_outputs, n_steps))
+
+        ## Considerando apenas o caso contínuo com U diferente de zero
+        legal_shapes = [(n_steps,), (1, n_steps)] if n_inputs == 1 else \
+            [(n_inputs, n_steps)]
+
+        U = auxiliar._check_convert_array(U, legal_shapes,
+                                          'Parameter ``U``: ', squeeze=False,
+                                          transpose=transpose)
+
+        # -------------------------------------------------------------------------------------------------------------
+        # Laço principal
+        for i in range(1, n_steps):
+            Il = self._Iin/d_t[i] - self._Vo/(pow(d_t[i], 2) * self._Rp)
+            Vcin = self._Vo/d_t[i]
+
+            if Vcin == 0:
+                f12 = -self._Vo/(self._L*0.01)
+            else:
+                f12 = -self._Vo/(self._L*Vcin)
+
+            if Il == 0:
+                f21 = self._Iin/(self._C*0.01)
+            else:
+                f21 = self._Iin/(self._C*Il)
+
+            g11 = Vcin/self._L
+
+            g21 = -Il/self._C
+
+            sig121 = (f12 - a122) / (a121 - a122)
+            sig122 = (a121 - f12) / (a121 - a122)
+
+            tau211 = (f21 - a212) / (a211 - a212)
+            tau212 = (a211 - f21) / (a211 - a212)
+
+            gamma111 = (g11 - b112) / (b111 - b112)
+            gamma112 = (b111 - g11) / (b111 - b112)
+
+            rho211 = (g21 - b212) / (b211 - b212)
+            rho212 = (b211 - g21) / (b211 - b212)
+
+            alpha1 = gamma111*rho211*sig121*tau211; alpha2 = gamma111*rho211*sig121*tau212
+            alpha3 = gamma111*rho211*sig122*tau211; alpha4 = gamma111*rho211*sig122*tau212
+            alpha5 = gamma111*rho212*sig121*tau211; alpha6 = gamma111*rho212*sig121*tau212
+            alpha7 = gamma111*rho212*sig122*tau211; alpha8 = gamma111*rho212*sig121*tau212
+            alpha9 = gamma112*rho211*sig121*tau211; alpha10 = gamma112*rho211*sig121*tau212
+            alpha11 = gamma112*rho211*sig122*tau211; alpha12 = gamma112*rho211*sig122*tau212
+            alpha13 = gamma112*rho212*sig121*tau211; alpha14 = gamma112*rho212*sig121*tau212
+            alpha15 = gamma112*rho212*sig122*tau211; alpha16 = gamma112*rho212*sig121*tau212
+
+
+            A = alpha1 * A1 + alpha2 * A2 + alpha3 * A3 + alpha4 * A4\
+                +alpha5 * A5 + alpha6 * A6 + alpha7 * A7 + alpha8 * A8\
+                +alpha9 * A9 + alpha10 * A10 + alpha11 * A11 + alpha12 * A12\
+                +alpha13 * A13 + alpha14 * A14 + alpha15 * A15 + alpha16 * A16
+            B = alpha1 * B1 + alpha2 * B2 + alpha3 * B3 + alpha4 * B4\
+                + alpha5 * B5 + alpha6 * B6 + alpha7 * B7 + alpha8 * B8\
+                + alpha9 * B9 + alpha10 * B10 + alpha11 * B11 + alpha12 * B12\
+                + alpha13 * B13 + alpha14 * B14 + alpha15 * B15 + alpha16 * B16
+
+
+            U = d_t[i] * np.ones_like(T)
+            if U is not None:
+                U = np.asarray(U)
+            if len(U.shape) == 1:
+                U = U.reshape(1, -1)
+
+            M = np.block([[A * dt, B * dt, np.zeros((n_states, n_inputs))],
+                          [np.zeros((n_inputs, n_states + n_inputs)),
+                           np.identity(n_inputs)],
+                          [np.zeros((n_inputs, n_states + 2 * n_inputs))]])
+            expM = sp.linalg.expm(M)
+            Ad = expM[:n_states, :n_states]
+            Bd1 = expM[:n_states, n_states + n_inputs:]
+            Bd0 = expM[:n_states, n_states:n_states + n_inputs] - Bd1
+
+            xout[:, i] = (np.dot(Ad, xout[:, i - 1]) + np.dot(Bd0, U[:, i - 1]) +
+                          np.dot(Bd1, U[:, i]))
+            yout = np.dot(C, xout) + np.dot(E, U)
+
+        return yout

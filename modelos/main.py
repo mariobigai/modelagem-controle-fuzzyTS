@@ -7,9 +7,9 @@ from modelos import conversores_cc_basicos
 import numpy as np
 import pandas as pd
 
-conversor = conversores_cc_basicos.Boost_ideal_saida(50, 150e-6, 50e-3, 100)
+conversor = conversores_cc_basicos.Buck_ideal_entrada(12, 100e-6, 500e-6, 10, 10)
 
-T = np.arange(0,0.1,1e-5)
+T = np.arange(0,0.3,1e-5)
 U = np.ones_like(T)
 
 duty = []
@@ -25,38 +25,39 @@ for i in range(int(len(T)/5)):
      duty.append(0.4)
 ys_TS = conversor.forced_response_TS(duty, 0.1, 0.9, T, U, 0., False, False, None, True)
 
-#print(ys_TS.shape)
 
-## Simulação do PSIM com passo 1E-6
-df = pd.read_fwf('boost.txt')
+
+# Simulação do PSIM com passo 1E-6 ---------------------------------------------------------------
+
+df = pd.read_fwf('buck.txt')
 #print(df.head())
 
 tempo = df[['Time']].to_numpy()
 corrente_indutor = df[['I(RL1)']].to_numpy()
-tensao_saida = df[['Vo']].to_numpy()
+tensao_entrada = df[['vin']].to_numpy()
 
 
 tempo = tempo.transpose()
 corrente_indutor = corrente_indutor.transpose()
-tensao_saida = tensao_saida.transpose()
+tensao_entrada = tensao_entrada.transpose()
 
 tempo = tempo[0][0:-1:10]
 corrente_indutor = corrente_indutor[0][0:-1:10]
-tensao_saida = tensao_saida[0][0:-1:10]
+tensao_entrada = tensao_entrada[0][0:-1:10]
 
-Vo_t = []
+Vin_t = []
 il_t = []
 for D in duty:
-    Vo_t.append(100/(1-D))
-    il_t.append((100/pow((1-D),2))/50)
+    Vin_t.append(12/D)
+    il_t.append(10/D - 12/(D**2*10))
 #---------------------------------------------------------------------------------
 # Plotando o resultado
 fig1, f1_axes = plt.subplots(ncols=1, nrows=2, figsize=(15,10))
 f1_axes[0].plot(T, ys_TS[0], linewidth=1.5, label="Modelo fuzzy TS")
 f1_axes[0].grid(True)
-f1_axes[0].plot(tempo, tensao_saida, linewidth=1.5, label="Simulação PSIM")
-f1_axes[0].plot(T, Vo_t, linewidth=1.5, label="Referência de tensão estacionária", linestyle='dashed')
-f1_axes[0].set_title("Tensão de Saída (V)")
+f1_axes[0].plot(tempo, tensao_entrada, linewidth=1.5, label="Simulação PSIM")
+f1_axes[0].plot(T, Vin_t, linewidth=1.5, label="Referência de tensão estacionária", linestyle='dashed')
+f1_axes[0].set_title("Tensão de Entrada (V)")
 f1_axes[0].set_xlabel("Tempo (s)")
 f1_axes[0].set_ylabel("Tensão (V)")
 f1_axes[0].legend(loc = 'upper right')
