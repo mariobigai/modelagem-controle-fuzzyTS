@@ -530,11 +530,11 @@ class Buck_ideal_entrada:
             alpha1 = gamma111*rho211*sig121*tau211; alpha2 = gamma111*rho211*sig121*tau212
             alpha3 = gamma111*rho211*sig122*tau211; alpha4 = gamma111*rho211*sig122*tau212
             alpha5 = gamma111*rho212*sig121*tau211; alpha6 = gamma111*rho212*sig121*tau212
-            alpha7 = gamma111*rho212*sig122*tau211; alpha8 = gamma111*rho212*sig121*tau212
+            alpha7 = gamma111*rho212*sig122*tau211; alpha8 = gamma111*rho212*sig122*tau212
             alpha9 = gamma112*rho211*sig121*tau211; alpha10 = gamma112*rho211*sig121*tau212
             alpha11 = gamma112*rho211*sig122*tau211; alpha12 = gamma112*rho211*sig122*tau212
             alpha13 = gamma112*rho212*sig121*tau211; alpha14 = gamma112*rho212*sig121*tau212
-            alpha15 = gamma112*rho212*sig122*tau211; alpha16 = gamma112*rho212*sig121*tau212
+            alpha15 = gamma112*rho212*sig122*tau211; alpha16 = gamma112*rho212*sig122*tau212
 
 
             A = alpha1 * A1 + alpha2 * A2 + alpha3 * A3 + alpha4 * A4\
