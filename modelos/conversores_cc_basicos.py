@@ -33,13 +33,18 @@ class Buck_Boost_ideal_saida:
         Il_max = (self._Vin / self._R) * (d_max / pow((1 - d_max),2))
         Vc_max = self._Vin * (d_max / (1-d_max))
 
+        print(f'Il_min: {Il_min}; Il_max: {Il_max}')
+        print(f'Vc_min: {Vc_min}; Vc_max: {Vc_max}')
+
         # Máximos e mínimos de g11
         b111 = (self._Vin + Vc_max) / self._L
         b112 = (self._Vin + Vc_min) / self._L
+        print(f'g11_min: {b112}; g11_max: {b111}')
 
         # Máximos e mínimos de g12
         b211 = (-1 * Il_min) / self._C
         b212 = (-1 * Il_max) / self._C
+        print(f'g21_min: {b212}; g21_max: {b211}')
 
         # Modelos lineares locais
         B1 = np.array([[b111], [b211]])
@@ -188,20 +193,23 @@ class Boost_ideal_saida:
         Il_max = self._Vin/(pow((1 - d_max),2)*self._R)
         Vc_max = self._Vin/(1-d_max)
 
+        print(f'Il_min: {Il_min}; Il_max: {Il_max}')
+        print(f'Vc_min: {Vc_min}; Vc_max: {Vc_max}')
+
         #Máximos e mínimos de f12
         a121 = -1/self._L + self._Vin/(self._L*Vc_max)
         a122 = -1/self._L + self._Vin/(self._L*Vc_min)
-        print(a121, a122)
+        print(f'f12_min: {a121}; f12_max: {a122}')
 
         # Máximos e mínimos de g11
         b111 = Vc_max/self._L
         b112 = Vc_min/self._L
-        print(b111, b112)
+        print(f'g11_min: {b111}; g11_max: {b112}')
 
         # Máximos e mínimos de g12
         b211 = -Il_max/self._C
         b212 = -Il_min/self._C
-        print(b211, b212)
+        print(f'g11_min: {b111}; g11_max: {b112}')
 
         # Modelos lineares locais
         A1 = np.array([[0, a121],[1/self._C, -1/(self._R*self._C)]])
