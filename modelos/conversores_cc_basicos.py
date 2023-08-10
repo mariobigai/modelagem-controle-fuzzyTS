@@ -377,44 +377,44 @@ class Buck_ideal_entrada:
         :return: Resultado da simulação: x, y
         """
         # Região mínima de operação
-        Il_min = self._Iin/d_min - self._Vo/(pow(d_min,2)*self._Rp)
-        Vcin_min = self._Vo/d_min
+        Il_min = -20 #self._Iin/d_min - self._Vo/(pow(d_min,2)*self._Rp)
+        Vcin_min = 0 #self._Vo/d_min
 
         # Região máxima de operação
-        Il_max = self._Iin/d_max - self._Vo/(pow(d_max, 2)*self._Rp)
-        Vcin_max = self._Vo/d_max
+        Il_max = 20 #self._Iin/d_max - self._Vo/(pow(d_max, 2)*self._Rp)
+        Vcin_max = 50 #self._Vo/d_max
 
         # Máximos e mínimos aplicados a f12
         if Vcin_max == 0:
-            a121 = -self._Vo/(self._L*0.01)
+            a121 = -10000 #-self._Vo/(self._L*0.01)
         else:
-            a121 = -self._Vo/(self._L*Vcin_max)
+            a121 = -10000 #-self._Vo/(self._L*Vcin_max)
         if Vcin_min == 0:
-            a122 = -self._Vo/(self._L*0.01)
+            a122 = -12e6 #-self._Vo/(self._L*0.01)
         else:
-            a122 = -self._Vo/(self._L*Vcin_min)
-        print(a121, a122)
+            a122 = -12e6 #-self._Vo/(self._L*Vcin_min)
+        print(a122, a121)
 
         # Máximos e mínimos aplicados a f21
         if Il_max == 0:
-            a211 = self._Iin/(self._C*0.01)
+            a211 = 200000 #self._Iin/(self._C*0.01)
         else:
-            a211 = self._Iin/(self._C*Il_max)
+            a211 = 200000 #self._Iin/(self._C*Il_max)
         if Il_min == 0:
-            a212 = -self._Iin/(self._L*0.01)
+            a212 = -200000 #-self._Iin/(self._L*0.01)
         else:
-            a212 = -self._Iin/(self._L*Il_min)
-        print(a211, a212)
+            a212 = -200000 #-self._Iin/(self._L*Il_min)
+        print(a212, a211)
 
         # Máximos e mínimos aplicados a g11
-        b111 = Vcin_max/self._L
-        b112 = Vcin_min/self._L
-        print(b111, b112)
+        b111 = 500000 #Vcin_max/self._L
+        b112 = 0 #Vcin_min/self._L
+        print(b112, b111)
 
         # Máximos e mínimos aplicados a g12
-        b211 = -Il_max/self._C
-        b212 = -Il_min/self._C
-        print(b211, b212)
+        b211 = 40000 #-Il_max/self._C
+        b212 = -40000 #-Il_min/self._C
+        print(b212, b211)
 
         # Modelos Lineares Locais
         A1 = np.array([[0, a121], [a211, -1/(self._Rp*self._C)]])
