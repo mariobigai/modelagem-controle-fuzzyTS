@@ -139,7 +139,12 @@ class Buck_Boost_ideal_saida:
             alpha3 = eps212 * sig111
             alpha4 = eps212 * sig112
 
-            B = alpha1*B1+alpha2*B2+alpha3*B3+alpha4*B4
+            h1 = alpha1/(alpha1+alpha2+alpha3+alpha4)
+            h2 = alpha2/(alpha1+alpha2+alpha3+alpha4)
+            h3 = alpha3/(alpha1+alpha2+alpha3+alpha4)
+            h4 = alpha4/(alpha1+alpha2+alpha3+alpha4)
+
+            B = h1*B1+h2*B2+h3*B3+h4*B4
 
             U = d_t[i] * np.ones_like(T)
             if U is not None:
