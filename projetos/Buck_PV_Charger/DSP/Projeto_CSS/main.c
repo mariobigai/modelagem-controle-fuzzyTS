@@ -1,13 +1,12 @@
 /*
- * main.c
- * Autor: Matheus Tauffer de Paula
+Autor: Matheus Tauffer de Paula
 */
 
 #include "Peripheral_Setup.h"
 
 #define OPENLOOP                                  // OPENLOOP / CLOSEDLOOP. OBS: comentar para D fixo
 #define FILTER_FREQ_1                             // FILTER_FREQ_1 = 1kHz
-#define STEP_D
+//#define STEP_D
 
 // Constantes do filtro digital para leitura do potenciômetro
 #ifdef FILTER_FREQ_1
@@ -24,7 +23,7 @@
 void updatePWM(float d);
 
 // Declaração das variáveis globais
-uint16_t adc, adc1, adcf, adcf1, cont, test;
+uint16_t adc, adc1, adcf, adcf1, cont, ad4, ad1, ad2;
 float duty, dutymax, dutymin;
 
 #ifdef OPENLOOP
@@ -92,8 +91,9 @@ __interrupt void isr_adc(void){
 
     // Resultado da conversão A/D (4 aquisições sucessivas)
     adc = (AdcaResultRegs.ADCRESULT0 + AdcaResultRegs.ADCRESULT1 + AdcaResultRegs.ADCRESULT2 + AdcaResultRegs.ADCRESULT3)/4;
-    //test = (AdcaResultRegs.ADCRESULT4 + AdcaResultRegs.ADCRESULT5 + AdcaResultRegs.ADCRESULT6 + AdcaResultRegs.ADCRESULT7)/4;
-    //test = AdcaResultRegs.ADCRESULT4;
+    ad2 = (AdcaResultRegs.ADCRESULT4 + AdcaResultRegs.ADCRESULT5 + AdcaResultRegs.ADCRESULT6 + AdcaResultRegs.ADCRESULT7)/4;
+    ad1 = (AdcaResultRegs.ADCRESULT8 + AdcaResultRegs.ADCRESULT9 + AdcaResultRegs.ADCRESULT10 + AdcaResultRegs.ADCRESULT11)/4;
+    ad4 = (AdcaResultRegs.ADCRESULT12 + AdcaResultRegs.ADCRESULT13 + AdcaResultRegs.ADCRESULT14 + AdcaResultRegs.ADCRESULT15)/4;
 
     // Implementação de filtro digital para leitura do potênciometro
     adcf = (b0*adc)+(b1*adc1)-(a1*adcf1);                    // Eq. a diferenças para o filtro do potênciometro
