@@ -4,9 +4,12 @@ Autor: Matheus Tauffer de Paula
 
 #include "Peripheral_Setup.h"
 
-#define OPENLOOP                                  // OPENLOOP / CLOSEDLOOP. OBS: comentar para D fixo
+#define CLOSEDLOOP                                  // OPENLOOP / CLOSEDLOOP. OBS: comentar para D fixo
 #define FILTER_FREQ_1                             // FILTER_FREQ_1 = 1kHz
 //#define STEP_D
+
+#define kcont1 0.003937
+#define kcont2 0.003875
 
 // Constantes do filtro digital para leitura do potenciômetro
 #ifdef FILTER_FREQ_1
@@ -24,7 +27,7 @@ void updatePWM(float d);
 
 // Declaração das variáveis globais
 uint16_t adc, adc1, adcf, adcf1, cont, ad4, ad1, ad2;
-float duty, dutymax, dutymin;
+float duty, dutymax, dutymin, vo_0, vo_ref, ek, ek_1, uk, uk_1;
 
 #ifdef OPENLOOP
 // Declaração de funções de interrupção
@@ -51,8 +54,8 @@ int main(void){
 
     // Inicialização das variáveis:
     duty = 0.6;                                   //
-    dutymax = 0.95;
-    dutymin = 0.05;
+    dutymax = 0.9;
+    dutymin = 0.1;
     //adc = 0;
     adc1 = 0;
     adcf1 = 0;
@@ -90,10 +93,10 @@ __interrupt void isr_adc(void){
     GpioDataRegs.GPADAT.bit.GPIO14 = 1;                      // Sinaliza o início da conversão A/D
 
     // Resultado da conversão A/D (4 aquisições sucessivas)
-    adc = (AdcaResultRegs.ADCRESULT0 + AdcaResultRegs.ADCRESULT1 + AdcaResultRegs.ADCRESULT2 + AdcaResultRegs.ADCRESULT3)/4;
-    ad2 = (AdcaResultRegs.ADCRESULT4 + AdcaResultRegs.ADCRESULT5 + AdcaResultRegs.ADCRESULT6 + AdcaResultRegs.ADCRESULT7)/4;
-    ad1 = (AdcaResultRegs.ADCRESULT8 + AdcaResultRegs.ADCRESULT9 + AdcaResultRegs.ADCRESULT10 + AdcaResultRegs.ADCRESULT11)/4;
-    ad4 = (AdcaResultRegs.ADCRESULT12 + AdcaResultRegs.ADCRESULT13 + AdcaResultRegs.ADCRESULT14 + AdcaResultRegs.ADCRESULT15)/4;
+    adc = (AdcaResultRegs.ADCRESULT0 + AdcaResultRegs.ADCRESULT1 + AdcaResultRegs.ADCRESULT2 + AdcaResultRegs.ADCRESULT3)/4;    // Potenciômetro
+    ad2 = (AdcaResultRegs.ADCRESULT4 + AdcaResultRegs.ADCRESULT5 + AdcaResultRegs.ADCRESULT6 + AdcaResultRegs.ADCRESULT7)/4;    // Iin
+    ad1 = (AdcaResultRegs.ADCRESULT8 + AdcaResultRegs.ADCRESULT9 + AdcaResultRegs.ADCRESULT10 + AdcaResultRegs.ADCRESULT11)/4;  // Vin
+    ad4 = (AdcaResultRegs.ADCRESULT12 + AdcaResultRegs.ADCRESULT13 + AdcaResultRegs.ADCRESULT14 + AdcaResultRegs.ADCRESULT15)/4;// Vout
 
     // Implementação de filtro digital para leitura do potênciometro
     adcf = (b0*adc)+(b1*adc1)-(a1*adcf1);                    // Eq. a diferenças para o filtro do potênciometro
@@ -128,6 +131,35 @@ __interrupt void isr_adc(void){
 
 #ifdef CLOSEDLOOP
 __interrupt void isr_adc(void){
+    GpioDataRegs.GPADAT.bit.GPIO14 = 1;                      // Sinaliza o início da conversão A/D
 
+    // Resultado da conversão A/D (4 aquisições sucessivas)
+    ad4 = (AdcaResultRegs.ADCRESULT12 + AdcaResultRegs.ADCRESULT13 + AdcaResultRegs.ADCRESULT14 + AdcaResultRegs.ADCRESULT15)/4;
+
+    // Implementação de filtro digital para leitura do potênciometro
+    //adcf = (b0*adc)+(b1*adc1)-(a1*adcf1);                    // Eq. a diferenças para o filtro do potênciometro
+    //adc1 = adc;
+    //adcf1 = adcf;
+
+    vo_0 = (1*ad4)/4095;
+    vo_ref = 12;
+
+    // Cálculo do erro
+    ek = vo_ref - vo_0;
+
+    // Eq. a diferenças
+    uk = uk_1 + (kcont1*ek) - (kcont2*ek_1);
+
+    // Atualização das variáveis
+    ek_1 = ek;
+    uk_1 = uk;
+    duty = uk;
+
+    updatePWM(duty);                                         // Chamada a função que atualiza a razão cíclica
+
+    AdcaRegs.ADCINTFLGCLR.bit.ADCINT1 = 1;                   // Limpa a flag da interrupção INT1
+    PieCtrlRegs.PIEACK.all = PIEACK_GROUP1;
+
+    GpioDataRegs.GPADAT.bit.GPIO14 = 0;                      // Sinaliza o término da conversão A/D
 }
 #endif
