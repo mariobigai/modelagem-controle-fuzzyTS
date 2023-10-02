@@ -34,6 +34,11 @@ float duty, dutymax, dutymin, vo_0, vo_ref, ek, ek_1, uk, uk_1;
 __interrupt void isr_adc(void);
 #endif
 
+#ifdef CLOSEDLOOP
+// Declaração de funções de interrupção
+__interrupt void isr_adc(void);
+#endif
+
 int main(void){
 
     InitSysCtrl();                                  // Inicialização do sistema
@@ -52,9 +57,15 @@ int main(void){
     EDIS;
 #endif
 
+#ifdef CLOSEDLOOP
+    EALLOW;
+    PieVectTable.ADCA1_INT = &isr_adc;              // Passa o endereço da função de interrupção para a tabela de interrupções
+    EDIS;
+#endif
+
     // Inicialização das variáveis:
     duty = 0.6;                                   //
-    dutymax = 0.9;
+    dutymax = 0.4;
     dutymin = 0.1;
     //adc = 0;
     adc1 = 0;
@@ -141,14 +152,20 @@ __interrupt void isr_adc(void){
     //adc1 = adc;
     //adcf1 = adcf;
 
-    vo_0 = (1*ad4)/4095;
-    vo_ref = 12;
+    vo_0 = (13.6419*ad4 - 0.0252)/4095; //(14.059*ad4)/4095;       // 14.344
+    vo_ref = 5.5;
 
     // Cálculo do erro
     ek = vo_ref - vo_0;
 
     // Eq. a diferenças
     uk = uk_1 + (kcont1*ek) - (kcont2*ek_1);
+
+    if(uk > dutymax){
+        uk = dutymax;
+    }else if(uk < dutymin){
+        uk = dutymin;
+    }
 
     // Atualização das variáveis
     ek_1 = ek;
