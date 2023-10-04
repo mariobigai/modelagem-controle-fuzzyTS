@@ -152,8 +152,8 @@ __interrupt void isr_adc(void){
     //adc1 = adc;
     //adcf1 = adcf;
 
-    vo_0 = (13.6419*ad4 - 0.0252)/4095; //(14.059*ad4)/4095;       // 14.344
-    vo_ref = 5.5;
+    vo_0 = (14.059*((float)ad4/4095)); //(13.82*((float)ad4/4095) + 0.051);
+    vo_ref = 12;
 
     // Cálculo do erro
     ek = vo_ref - vo_0;
