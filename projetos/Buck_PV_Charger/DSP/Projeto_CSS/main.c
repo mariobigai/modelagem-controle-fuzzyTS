@@ -4,7 +4,7 @@ Autor: Matheus Tauffer de Paula
 
 #include "Peripheral_Setup.h"
 
-#define CLOSEDLOOP                                  // OPENLOOP / CLOSEDLOOP. OBS: comentar para D fixo
+#define OPENLOOP                                  // OPENLOOP / CLOSEDLOOP. OBS: comentar para D fixo
 #define FILTER_FREQ_1                             // FILTER_FREQ_1 = 1kHz
 //#define STEP_D
 
@@ -27,7 +27,7 @@ void updatePWM(float d);
 
 // Declaração das variáveis globais
 uint16_t adc, adc1, adcf, adcf1, cont, ad4, ad1, ad2;
-float duty, dutymax, dutymin, vo_0, vo_ref, ek, ek_1, uk, uk_1;
+float duty, dutymax, dutymin, vo_0, vin_0, vo_ref, ek, ek_1, uk, uk_1;
 
 #ifdef OPENLOOP
 // Declaração de funções de interrupção
@@ -65,8 +65,8 @@ int main(void){
 
     // Inicialização das variáveis:
     duty = 0.6;                                   //
-    dutymax = 0.4;
-    dutymin = 0.1;
+    dutymax = 0.6;
+    dutymin = 0.24;
     //adc = 0;
     adc1 = 0;
     adcf1 = 0;
@@ -109,6 +109,9 @@ __interrupt void isr_adc(void){
     ad1 = (AdcaResultRegs.ADCRESULT8 + AdcaResultRegs.ADCRESULT9 + AdcaResultRegs.ADCRESULT10 + AdcaResultRegs.ADCRESULT11)/4;  // Vin
     ad4 = (AdcaResultRegs.ADCRESULT12 + AdcaResultRegs.ADCRESULT13 + AdcaResultRegs.ADCRESULT14 + AdcaResultRegs.ADCRESULT15)/4;// Vout
 
+    vo_0 = (13.82*((float)ad4/4095) + 0.051);
+    vin_0 = (64.09*((float)ad1/4095) + 0.342); //(61.8*((float)ad1/4095)); //Curva Inicial
+
     // Implementação de filtro digital para leitura do potênciometro
     adcf = (b0*adc)+(b1*adc1)-(a1*adcf1);                    // Eq. a diferenças para o filtro do potênciometro
     adc1 = adc;
@@ -131,6 +134,12 @@ __interrupt void isr_adc(void){
         DacaRegs.DACVALS.bit.DACVALS = (uint16_t)(4095*duty);
     #endif
 
+    if(duty > dutymax){
+        duty = dutymax;
+    }else if(duty < dutymin){
+        duty = dutymin;
+    }
+
     updatePWM(duty);                                         // Chamada a função que atualiza a razão cíclica
 
     AdcaRegs.ADCINTFLGCLR.bit.ADCINT1 = 1;                   // Limpa a flag da interrupção INT1
@@ -152,7 +161,7 @@ __interrupt void isr_adc(void){
     //adc1 = adc;
     //adcf1 = adcf;
 
-    vo_0 = (14.059*((float)ad4/4095)); //(13.82*((float)ad4/4095) + 0.051);
+    vo_0 = (13.82*((float)ad4/4095) + 0.051); //(14.059*((float)ad4/4095));
     vo_ref = 12;
 
     // Cálculo do erro
