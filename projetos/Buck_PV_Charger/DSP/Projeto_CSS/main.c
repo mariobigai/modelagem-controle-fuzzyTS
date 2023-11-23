@@ -27,7 +27,7 @@ void updatePWM(float d);
 
 // Declaração das variáveis globais
 uint16_t adc, adc1, adcf, adcf1, cont, ad4, ad1, ad2;
-float duty, dutymax, dutymin, vo_0, vin_0, vo_ref, ek, ek_1, uk, uk_1;
+float duty, dutymax, dutymin, vo_0, vin_0, iin_0, vo_ref, ek, ek_1, uk, uk_1;
 
 #ifdef OPENLOOP
 // Declaração de funções de interrupção
@@ -111,6 +111,7 @@ __interrupt void isr_adc(void){
 
     vo_0 = (13.82*((float)ad4/4095) + 0.051);
     vin_0 = (64.09*((float)ad1/4095) + 0.342); //(61.8*((float)ad1/4095)); //Curva Inicial
+    iin_0 = (19.13*((float)ad2/4095)); //Curva Inicial
 
     // Implementação de filtro digital para leitura do potênciometro
     adcf = (b0*adc)+(b1*adc1)-(a1*adcf1);                    // Eq. a diferenças para o filtro do potênciometro
