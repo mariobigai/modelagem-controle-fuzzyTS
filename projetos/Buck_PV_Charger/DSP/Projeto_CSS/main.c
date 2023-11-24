@@ -66,7 +66,7 @@ int main(void){
     // Inicialização das variáveis:
     duty = 0.6;                                   //
     dutymax = 0.6;
-    dutymin = 0.24;
+    dutymin = 0.15;
     //adc = 0;
     adc1 = 0;
     adcf1 = 0;
@@ -111,7 +111,7 @@ __interrupt void isr_adc(void){
 
     vo_0 = (13.82*((float)ad4/4095) + 0.051);
     vin_0 = (64.09*((float)ad1/4095) + 0.342); //(61.8*((float)ad1/4095)); //Curva Inicial
-    iin_0 = (19.13*((float)ad2/4095)); //Curva Inicial
+    iin_0 = (19.568*((float)ad2/4095) + 0.0851);//(19.13*((float)ad2/4095)); //Curva Inicial
 
     // Implementação de filtro digital para leitura do potênciometro
     adcf = (b0*adc)+(b1*adc1)-(a1*adcf1);                    // Eq. a diferenças para o filtro do potênciometro
