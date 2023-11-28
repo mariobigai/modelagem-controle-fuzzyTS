@@ -4,12 +4,13 @@ Autor: Matheus Tauffer de Paula
 
 #include "Peripheral_Setup.h"
 
-#define OPENLOOP                                  // OPENLOOP / CLOSEDLOOP. OBS: comentar para D fixo
+#define CLOSEDLOOP                                  // OPENLOOP / CLOSEDLOOP. OBS: comentar para D fixo
 #define FILTER_FREQ_1                             // FILTER_FREQ_1 = 1kHz
 //#define STEP_D
+#define STEP_Ref_Vi
 
-#define kcont1 0.003937
-#define kcont2 0.003875
+#define kcont1 0.002283 //PI Vin        //0.003937 //PI Vout
+#define kcont2 0.002274 //PI Vin        //0.003875 //PI Vout
 
 // Constantes do filtro digital para leitura do potenciômetro
 #ifdef FILTER_FREQ_1
@@ -26,8 +27,9 @@ Autor: Matheus Tauffer de Paula
 void updatePWM(float d);
 
 // Declaração das variáveis globais
-uint16_t adc, adc1, adcf, adcf1, cont, ad4, ad1, ad2;
-float duty, dutymax, dutymin, vo_0, vin_0, iin_0, vo_ref, ek, ek_1, uk, uk_1;
+uint32_t cont;
+uint16_t adc, adc1, adcf, adcf1, ad4, ad1, ad2;
+float duty, dutymax, dutymin, vo_0, vin_0, iin_0, vo_ref, vi_ref, ek, ek_1, uk, uk_1;
 
 #ifdef OPENLOOP
 // Declaração de funções de interrupção
@@ -66,7 +68,7 @@ int main(void){
     // Inicialização das variáveis:
     duty = 0.6;                                   //
     dutymax = 0.6;
-    dutymin = 0.15;
+    dutymin = 0.24;
     //adc = 0;
     adc1 = 0;
     adcf1 = 0;
@@ -124,12 +126,12 @@ __interrupt void isr_adc(void){
 
     #ifdef STEP_D                                            // Realização de degraus de razão cíclica
         cont = cont + 1;
-        if(cont <= 600){
+        if(cont <= 75000){
             duty = 0.24;
         }else{
             duty = 0.4;
         }
-        if(cont == 1200){
+        if(cont == 150000){
             cont = 0;
         }
         DacaRegs.DACVALS.bit.DACVALS = (uint16_t)(4095*duty);
@@ -155,18 +157,34 @@ __interrupt void isr_adc(void){
     GpioDataRegs.GPADAT.bit.GPIO14 = 1;                      // Sinaliza o início da conversão A/D
 
     // Resultado da conversão A/D (4 aquisições sucessivas)
-    ad4 = (AdcaResultRegs.ADCRESULT12 + AdcaResultRegs.ADCRESULT13 + AdcaResultRegs.ADCRESULT14 + AdcaResultRegs.ADCRESULT15)/4;
+    adc = (AdcaResultRegs.ADCRESULT0 + AdcaResultRegs.ADCRESULT1 + AdcaResultRegs.ADCRESULT2 + AdcaResultRegs.ADCRESULT3)/4;    // Potenciômetro
+    ad2 = (AdcaResultRegs.ADCRESULT4 + AdcaResultRegs.ADCRESULT5 + AdcaResultRegs.ADCRESULT6 + AdcaResultRegs.ADCRESULT7)/4;    // Iin
+    ad1 = (AdcaResultRegs.ADCRESULT8 + AdcaResultRegs.ADCRESULT9 + AdcaResultRegs.ADCRESULT10 + AdcaResultRegs.ADCRESULT11)/4;  // Vin
+    ad4 = (AdcaResultRegs.ADCRESULT12 + AdcaResultRegs.ADCRESULT13 + AdcaResultRegs.ADCRESULT14 + AdcaResultRegs.ADCRESULT15)/4;// Vout
+
+    vo_0 = (13.82*((float)ad4/4095) + 0.051);
+    vin_0 = (64.09*((float)ad1/4095) + 0.342); //(61.8*((float)ad1/4095)); //Curva Inicial
+    iin_0 = (19.568*((float)ad2/4095) + 0.0851);//(19.13*((float)ad2/4095)); //Curva Inicial
 
     // Implementação de filtro digital para leitura do potênciometro
     //adcf = (b0*adc)+(b1*adc1)-(a1*adcf1);                    // Eq. a diferenças para o filtro do potênciometro
     //adc1 = adc;
     //adcf1 = adcf;
 
-    vo_0 = (13.82*((float)ad4/4095) + 0.051); //(14.059*((float)ad4/4095));
-    vo_ref = 12;
+    #ifdef STEP_Ref_Vi                                          // Realização de degraus de razão cíclica
+        cont = cont + 1;
+        if(cont <= 75000){
+            vi_ref = 30;
+        }else{
+            vi_ref = 35;
+        }
+        if(cont == 150000){
+            cont = 0;
+        }
+    #endif
 
     // Cálculo do erro
-    ek = vo_ref - vo_0;
+    ek = -(vi_ref - vin_0);
 
     // Eq. a diferenças
     uk = uk_1 + (kcont1*ek) - (kcont2*ek_1);
