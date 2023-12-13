@@ -1,13 +1,9 @@
-"""
-Arquivo main para testar códigos dos modelos dos conversores
-Trabalho Futuro - Refatorar implementando TDD
-"""
 import matplotlib.pyplot as plt
-from modelos import conversores_cc_basicos
+import conversores_cc_basicos
 import numpy as np
 import pandas as pd
 
-conversor = conversores_cc_basicos.Buck_ideal_entrada(12, 100e-6, 500e-6, 10, 10)
+conversor = conversores_cc_basicos.Buck_ideal_entrada(Vo=12, L=100e-6, C=500e-6, Iin=10, Rp=10)
 
 T = np.arange(0,0.3,1e-5)
 U = np.ones_like(T)
@@ -23,9 +19,7 @@ for i in range(int(len(T)/5)):
      duty.append(0.6)
 for i in range(int(len(T)/5)):
      duty.append(0.4)
-ys_TS = conversor.forced_response_TS(duty, 0, 0.9, T, U, 0., False, False, None, True)
-
-
+ys_TS = conversor.forced_response_TS(duty, 0.24, 0.6, T, U, 0., False, False, None, True)
 
 # Simulação do PSIM com passo 1E-6 ---------------------------------------------------------------
 

@@ -1,5 +1,5 @@
 import control as ctr
-from modelos import auxiliar
+import auxiliar
 import numpy as np
 import scipy as sp
 
@@ -376,69 +376,78 @@ class Buck_ideal_entrada:
         :param squeeze: (Biblioteca control)
         :return: Resultado da simulação: x, y
         """
-        # Região mínima de operação
-        Il_min = -20 #self._Iin/d_min - self._Vo/(pow(d_min,2)*self._Rp)
-        Vcin_min = 0 #self._Vo/d_min
+        # # Região mínima de operação
+        # Il_min = 0 # self._Iin/d_min - self._Vo/(pow(d_min,2)*self._Rp)
+        # Vcin_min = 0 #self._Vo/d_min
+        #
+        # # Região máxima de operação
+        # Il_max = 20 #self._Iin/d_max - self._Vo/(pow(d_max, 2)*self._Rp)
+        # Vcin_max = 50 #self._Vo/d_max
+        #
+        # # Máximos e mínimos aplicados a f12
+        # if Vcin_max == 0:
+        #     a11 = -10000 #-self._Vo/(self._L*0.01)
+        # else:
+        #     a11 = -10000 #-self._Vo/(self._L*Vcin_max)
+        # if Vcin_min == 0:
+        #     a12 = -12e6 #-self._Vo/(self._L*0.01)
+        # else:
+        #     a12 = -12e6 #-self._Vo/(self._L*Vcin_min)
+        # print(a12, a11)
+        #
+        # # Máximos e mínimos aplicados a f21
+        # if Il_max == 0:
+        #     a21 = 200000 #self._Iin/(self._C*0.01)
+        # else:
+        #     a21 = 200000 #self._Iin/(self._C*Il_max)
+        # if Il_min == 0:
+        #     a22 = -200000 #-self._Iin/(self._L*0.01)
+        # else:
+        #     a22 = -200000 #-self._Iin/(self._L*Il_min)
+        # print(a22, a21)
+        #
+        # # Máximos e mínimos aplicados a g11
+        # b31 = 500000 # Vcin_max/self._L
+        # b32 = 0 # Vcin_min/self._L
+        # print(b32, b31)
+        #
+        # # Máximos e mínimos aplicados a g12
+        # b41 = 40000 #-Il_max/self._C
+        # b42 = -40000 #-Il_min/self._C
+        # print(b42, b41)
 
-        # Região máxima de operação
-        Il_max = 20 #self._Iin/d_max - self._Vo/(pow(d_max, 2)*self._Rp)
-        Vcin_max = 50 #self._Vo/d_max
-
-        # Máximos e mínimos aplicados a f12
-        if Vcin_max == 0:
-            a121 = -10000 #-self._Vo/(self._L*0.01)
-        else:
-            a121 = -10000 #-self._Vo/(self._L*Vcin_max)
-        if Vcin_min == 0:
-            a122 = -12e6 #-self._Vo/(self._L*0.01)
-        else:
-            a122 = -12e6 #-self._Vo/(self._L*Vcin_min)
-        print(a122, a121)
-
-        # Máximos e mínimos aplicados a f21
-        if Il_max == 0:
-            a211 = 200000 #self._Iin/(self._C*0.01)
-        else:
-            a211 = 200000 #self._Iin/(self._C*Il_max)
-        if Il_min == 0:
-            a212 = -200000 #-self._Iin/(self._L*0.01)
-        else:
-            a212 = -200000 #-self._Iin/(self._L*Il_min)
-        print(a212, a211)
-
-        # Máximos e mínimos aplicados a g11
-        b111 = 500000 #Vcin_max/self._L
-        b112 = 0 #Vcin_min/self._L
-        print(b112, b111)
-
-        # Máximos e mínimos aplicados a g12
-        b211 = 40000 #-Il_max/self._C
-        b212 = -40000 #-Il_min/self._C
-        print(b212, b211)
+        a11 = -10855.3078
+        a12 = -27138.2695
+        a21 = 533.3367
+        a22 = 333.3347
+        b31 = 2261522.4570
+        b32 = 904608.9828
+        b41 = -1929
+        b42 = -3086.4074
 
         # Modelos Lineares Locais
-        A1 = np.array([[0, a121], [a211, -1/(self._Rp*self._C)]])
+        A1 = np.array([[0, a11], [a21, -1/(self._Rp*self._C)]])
         A5 = A1; A9 = A1; A13 = A1
 
-        A2 = np.array([[0, a121], [a212, -1/(self._Rp*self._C)]])
+        A2 = np.array([[0, a12], [a21, -1/(self._Rp*self._C)]])
         A6 = A2; A10 = A2; A14 = A2
 
-        A3 = np.array([[0, a122], [a211, -1/(self._Rp * self._C)]])
+        A3 = np.array([[0, a11], [a22, -1/(self._Rp * self._C)]])
         A7 = A3; A11 = A3; A15 = A3
 
-        A4 = np.array([[0, a122], [a212, -1/(self._Rp * self._C)]])
+        A4 = np.array([[0, a12], [a22, -1/(self._Rp * self._C)]])
         A8 = A4; A12 = A4; A16 = A4
 
-        B1 = np.array([[b111], [b211]])
+        B1 = np.array([[b31], [b41]])
         B2=B1; B3=B1; B4=B1
 
-        B5 = np.array([[b111], [b212]])
+        B5 = np.array([[b32], [b41]])
         B6 = B5; B7 = B5; B8 = B5
 
-        B9 = np.array([[b112], [b211]])
+        B9 = np.array([[b31], [b42]])
         B10 = B9; B11 = B9; B12 = B9
 
-        B13 = np.array([[b112], [b212]])
+        B13 = np.array([[b32], [b42]])
         B14 = B13; B15 = B13; B16 = B13
 
         #Considerando inicialmente alpha16=1 demais = 0
@@ -515,50 +524,59 @@ class Buck_ideal_entrada:
             Vcin = self._Vo/d_t[i]
 
             if Vcin == 0:
-                f12 = -self._Vo/(self._L*0.01)
+                z1 = -self._Vo / (self._L * 0.01)
             else:
-                f12 = -self._Vo/(self._L*Vcin)
+                z1 = -self._Vo / (self._L * Vcin)
 
             if Il == 0:
-                f21 = self._Iin/(self._C*0.01)
+                z2 = self._Iin / (self._C * 0.01)
             else:
-                f21 = self._Iin/(self._C*Il)
+                z2 = self._Iin / (self._C * Il)
 
-            g11 = Vcin/self._L
+            z3 = Vcin / self._L
 
-            g21 = -Il/self._C
+            z4 = -Il / self._C
 
-            sig121 = (f12 - a122) / (a121 - a122)
-            sig122 = (a121 - f12) / (a121 - a122)
+            M11 = (z1 - a12) / (a11 - a12)
+            M12 = (a11 - z1) / (a11 - a12)
 
-            tau211 = (f21 - a212) / (a211 - a212)
-            tau212 = (a211 - f21) / (a211 - a212)
+            M21 = (z2 - a22) / (a21 - a22)
+            M22 = (a21 - z2) / (a21 - a22)
 
-            gamma111 = (g11 - b112) / (b111 - b112)
-            gamma112 = (b111 - g11) / (b111 - b112)
+            M31 = (z3 - b32) / (b31 - b32)
+            M32 = (b31 - z3) / (b31 - b32)
 
-            rho211 = (g21 - b212) / (b211 - b212)
-            rho212 = (b211 - g21) / (b211 - b212)
+            M41 = (z4 - b42) / (b41 - b42)
+            M42 = (b41 - z4) / (b41 - b42)
 
-            alpha1 = gamma111*rho211*sig121*tau211; alpha2 = gamma111*rho211*sig121*tau212
-            alpha3 = gamma111*rho211*sig122*tau211; alpha4 = gamma111*rho211*sig122*tau212
-            alpha5 = gamma111*rho212*sig121*tau211; alpha6 = gamma111*rho212*sig121*tau212
-            alpha7 = gamma111*rho212*sig122*tau211; alpha8 = gamma111*rho212*sig122*tau212
-            alpha9 = gamma112*rho211*sig121*tau211; alpha10 = gamma112*rho211*sig121*tau212
-            alpha11 = gamma112*rho211*sig122*tau211; alpha12 = gamma112*rho211*sig122*tau212
-            alpha13 = gamma112*rho212*sig121*tau211; alpha14 = gamma112*rho212*sig121*tau212
-            alpha15 = gamma112*rho212*sig122*tau211; alpha16 = gamma112*rho212*sig122*tau212
+            W1 = M41*M31*M21*M11; W9 = M42*M31*M21*M11;
+            W2 = M41*M31*M21*M12; W10 = M42*M31*M21*M12;
+            W3 = M41*M31*M22*M11; W11 = M42*M31*M22*M11;
+            W4 = M41*M31*M22*M12; W12 = M42*M31*M22*M12;
+            W5 = M41*M32*M21*M11; W13 = M42*M32*M21*M11;
+            W6 = M41*M32*M21*M12; W14 = M42*M32*M21*M12;
+            W7 = M41*M32*M22*M11; W15 = M42*M32*M22*M11;
+            W8 = M41*M32*M22*M12; W16 = M42*M32*M22*M12;
 
+            h1 = W1/(W1+W2+W3+W4+W5+W6+W7+W8+W9+W10+W11+W12+W13+W14+W15+W16)
+            h2 = W2 / (W1 + W2 + W3 + W4 + W5 + W6 + W7 + W8 + W9 + W10 + W11 + W12 + W13 + W14 + W15 + W16)
+            h3 = W3 / (W1 + W2 + W3 + W4 + W5 + W6 + W7 + W8 + W9 + W10 + W11 + W12 + W13 + W14 + W15 + W16)
+            h4 = W4 / (W1 + W2 + W3 + W4 + W5 + W6 + W7 + W8 + W9 + W10 + W11 + W12 + W13 + W14 + W15 + W16)
+            h5 = W5 / (W1 + W2 + W3 + W4 + W5 + W6 + W7 + W8 + W9 + W10 + W11 + W12 + W13 + W14 + W15 + W16)
+            h6 = W6 / (W1 + W2 + W3 + W4 + W5 + W6 + W7 + W8 + W9 + W10 + W11 + W12 + W13 + W14 + W15 + W16)
+            h7 = W7 / (W1 + W2 + W3 + W4 + W5 + W6 + W7 + W8 + W9 + W10 + W11 + W12 + W13 + W14 + W15 + W16)
+            h8 = W8 / (W1 + W2 + W3 + W4 + W5 + W6 + W7 + W8 + W9 + W10 + W11 + W12 + W13 + W14 + W15 + W16)
+            h9 = W9 / (W1 + W2 + W3 + W4 + W5 + W6 + W7 + W8 + W9 + W10 + W11 + W12 + W13 + W14 + W15 + W16)
+            h10 = W10 / (W1 + W2 + W3 + W4 + W5 + W6 + W7 + W8 + W9 + W10 + W11 + W12 + W13 + W14 + W15 + W16)
+            h11 = W11 / (W1 + W2 + W3 + W4 + W5 + W6 + W7 + W8 + W9 + W10 + W11 + W12 + W13 + W14 + W15 + W16)
+            h12 = W12 / (W1 + W2 + W3 + W4 + W5 + W6 + W7 + W8 + W9 + W10 + W11 + W12 + W13 + W14 + W15 + W16)
+            h13 = W13 / (W1 + W2 + W3 + W4 + W5 + W6 + W7 + W8 + W9 + W10 + W11 + W12 + W13 + W14 + W15 + W16)
+            h14 = W14 / (W1 + W2 + W3 + W4 + W5 + W6 + W7 + W8 + W9 + W10 + W11 + W12 + W13 + W14 + W15 + W16)
+            h15 = W15 / (W1 + W2 + W3 + W4 + W5 + W6 + W7 + W8 + W9 + W10 + W11 + W12 + W13 + W14 + W15 + W16)
+            h16 = W16 / (W1 + W2 + W3 + W4 + W5 + W6 + W7 + W8 + W9 + W10 + W11 + W12 + W13 + W14 + W15 + W16)
 
-            A = alpha1 * A1 + alpha2 * A2 + alpha3 * A3 + alpha4 * A4\
-                +alpha5 * A5 + alpha6 * A6 + alpha7 * A7 + alpha8 * A8\
-                +alpha9 * A9 + alpha10 * A10 + alpha11 * A11 + alpha12 * A12\
-                +alpha13 * A13 + alpha14 * A14 + alpha15 * A15 + alpha16 * A16
-            B = alpha1 * B1 + alpha2 * B2 + alpha3 * B3 + alpha4 * B4\
-                + alpha5 * B5 + alpha6 * B6 + alpha7 * B7 + alpha8 * B8\
-                + alpha9 * B9 + alpha10 * B10 + alpha11 * B11 + alpha12 * B12\
-                + alpha13 * B13 + alpha14 * B14 + alpha15 * B15 + alpha16 * B16
-
+            A = h1 * A1 + h2 * A2 + h3 * A3 + h4 * A4+ h5 * A5 + h6 * A6 + h7 * A7 + h8 * A8+ h9 * A9 + h10 * A10 + h11 * A11 + h12 * A12 + h13 * A13 + h14 * A14 + h15 * A15 + h16 * A16
+            B = h1 * B1 + h2 * B2 + h3 * B3 + h4 * B4 + h5 * B5 + h6 * B6 + h7 * B7 + h8 * B8 + h9 * B9 + h10 * B10 + h11 * B11 + h12 * B12 + h13 * B13 + h14 * B14 + h15 * B15 + h16 * B16
 
             U = d_t[i] * np.ones_like(T)
             if U is not None:
