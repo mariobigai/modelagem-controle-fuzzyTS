@@ -377,44 +377,40 @@ class Buck_ideal_entrada:
         :return: Resultado da simulação: x, y
         """
         # # Região mínima de operação
-        # Il_min = 0 # self._Iin/d_min - self._Vo/(pow(d_min,2)*self._Rp)
-        # Vcin_min = 0 #self._Vo/d_min
+        # Il_min = 0#self._Iin/d_min - self._Vo/(pow(d_min, 2)*self._Rp)
+        # Vcin_min = 0#self._Vo/d_min
         #
         # # Região máxima de operação
-        # Il_max = 20 #self._Iin/d_max - self._Vo/(pow(d_max, 2)*self._Rp)
-        # Vcin_max = 50 #self._Vo/d_max
+        # Il_max = self._Iin/d_min - self._Vo/(pow(d_min, 2)*self._Rp)
+        # Vcin_max = self._Vo/d_max
         #
         # # Máximos e mínimos aplicados a f12
         # if Vcin_max == 0:
-        #     a11 = -10000 #-self._Vo/(self._L*0.01)
+        #     a11 = -self._Vo/(self._L*0.01)
         # else:
-        #     a11 = -10000 #-self._Vo/(self._L*Vcin_max)
+        #     a11 = -self._Vo/(self._L*Vcin_max)
         # if Vcin_min == 0:
-        #     a12 = -12e6 #-self._Vo/(self._L*0.01)
+        #     a12 = -self._Vo/(self._L*0.01)
         # else:
-        #     a12 = -12e6 #-self._Vo/(self._L*Vcin_min)
-        # print(a12, a11)
+        #     a12 = -self._Vo/(self._L*Vcin_min)
         #
         # # Máximos e mínimos aplicados a f21
-        # if Il_max == 0:
-        #     a21 = 200000 #self._Iin/(self._C*0.01)
-        # else:
-        #     a21 = 200000 #self._Iin/(self._C*Il_max)
         # if Il_min == 0:
-        #     a22 = -200000 #-self._Iin/(self._L*0.01)
+        #     a21 = self._Iin/(self._C*0.01)
         # else:
-        #     a22 = -200000 #-self._Iin/(self._L*Il_min)
-        # print(a22, a21)
+        #     a21 = self._Iin/(self._C*Il_min)
+        # if Il_max == 0:
+        #     a22 = self._Iin/(self._L*0.01)
+        # else:
+        #     a22 = self._Iin/(self._L*Il_max)
         #
         # # Máximos e mínimos aplicados a g11
-        # b31 = 500000 # Vcin_max/self._L
-        # b32 = 0 # Vcin_min/self._L
-        # print(b32, b31)
+        # b31 = Vcin_max/self._L
+        # b32 = Vcin_min/self._L
         #
         # # Máximos e mínimos aplicados a g12
-        # b41 = 40000 #-Il_max/self._C
-        # b42 = -40000 #-Il_min/self._C
-        # print(b42, b41)
+        # b41 = -Il_min/self._C
+        # b42 = -Il_max/self._C
 
         a11 = -10855.3078
         a12 = -27138.2695
@@ -424,6 +420,15 @@ class Buck_ideal_entrada:
         b32 = 904608.9828
         b41 = -1929
         b42 = -3086.4074
+
+        print(f'min(z1) = a12 = {a12}')
+        print(f'max(z1) = a11 = {a11}')
+        print(f'min(z2) = a22 = {a22}')
+        print(f'max(z2) = a21 = {a21}')
+        print(f'min(z3) = b32 = {b32}')
+        print(f'max(z3) = b31 = {b31}')
+        print(f'min(z4) = b42 = {b42}')
+        print(f'max(z4) = b41 = {b41}')
 
         # Modelos Lineares Locais
         A1 = np.array([[0, a11], [a21, -1/(self._Rp*self._C)]])
