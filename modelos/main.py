@@ -3,27 +3,27 @@ import conversores_cc_basicos
 import numpy as np
 import pandas as pd
 
-conversor = conversores_cc_basicos.Buck_ideal_entrada(Vo=12, L=22.109e-6, C=2.7e-3, Iin=7.5, Rp=8)
+conversor = conversores_cc_basicos.Buck_ideal_entrada(Vo=12, L=22.109e-6, C=2.7e-3, Iin=19, Rp=8)
 
 T = np.arange(0,0.3,1e-5)
 U = np.ones_like(T)
 
 duty = []
 for i in range(int(len(T)/5)):
-    duty.append(0.3)
+    duty.append(0.6)
 for i in range(int(len(T)/5)):
-     duty.append(0.5)
+     duty.append(0.51)
 for i in range(int(len(T)/5)):
-     duty.append(0.4)
+     duty.append(0.42)
 for i in range(int(len(T)/5)):
-     duty.append(0.6)
+     duty.append(0.33)
 for i in range(int(len(T)/5)):
-     duty.append(0.4)
+     duty.append(0.24)
 ys_TS = conversor.forced_response_TS(duty, 0.24, 0.6, T, U, 0., False, False, None, True)
 
 # Simulação do PSIM com passo 1E-6 ---------------------------------------------------------------
 
-df = pd.read_fwf('buck_projeto_resultado.txt')
+df = pd.read_fwf('buck_projeto_resultados_ideal.txt')
 #print(df.head())
 
 tempo = df[['Time']].to_numpy()
@@ -43,7 +43,7 @@ Vin_t = []
 il_t = []
 for D in duty:
     Vin_t.append(12/D)
-    il_t.append(7.5/D - 12/(8*D**2))
+    il_t.append(19/D - 12/(8*D**2))
 #---------------------------------------------------------------------------------
 # Plotando o resultado
 fig1, f1_axes = plt.subplots(ncols=1, nrows=2, figsize=(15,10))
