@@ -24,7 +24,6 @@ ys_TS = conversor.forced_response_TS(duty, 0.24, 0.6, T, U, 0., False, False, No
 # Simulação do PSIM com passo 1E-6 ---------------------------------------------------------------
 
 df = pd.read_fwf('buck_ajustado.txt')
-#print(df.head())
 
 tempo = df[['Time']].to_numpy()
 corrente_indutor = df[['I(RL1)']].to_numpy()
@@ -44,6 +43,7 @@ il_t = []
 for D in duty:
     Vin_t.append(12/D)
     il_t.append(10/D - 12/(10*D**2))
+
 #---------------------------------------------------------------------------------
 # Plotando o resultado
 fig1, f1_axes = plt.subplots(ncols=1, nrows=2, figsize=(15,10))
