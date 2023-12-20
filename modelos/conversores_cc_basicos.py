@@ -377,9 +377,11 @@ class Buck_ideal_entrada:
         :return: Resultado da simulação: x, y
         """
         # máximos e mínimos considerando os valores genéricos
-        a11 = -2400; a12 = -6000
+        # a11 = -2400; a12 = -6000
+        a11 = -342.8571; a12 = -857.1429 #Vo=12, L=700e-6, C=500e-6, Iin=10, Rp=10
         a21 = 1500.0038; a22 = 960.0015
-        b31 = 500e3; b32 = 200e3
+        # b31 = 500e3; b32 = 200e3
+        b31 = 29761.8571; b32 = 19047.5743 #Vo=12, L=700e-6, C=500e-6, Iin=10, Rp=10
         b41 = -26666.6666; b42 = -41666.6666
 
         # # máximos e mínimos considerando os valores de projeto

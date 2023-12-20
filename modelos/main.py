@@ -4,9 +4,13 @@ import numpy as np
 import pandas as pd
 import edo
 
+<<<<<<< HEAD
 # # Simulação do Modelo Fuzzy T-S com passo 1E-5
 
 # conversor = conversores_cc_basicos.Buck_ideal_entrada(Vo=12, L=700e-6, C=500e-6, Iin=10, Rp=10)
+=======
+conversor = conversores_cc_basicos.Buck_ideal_entrada(Vo=12, L=700e-6, C=500e-6, Iin=10, Rp=10)
+>>>>>>> c250c0896e94b9e3199abbe0f2b475bee425a474
 
 T = np.arange(0,0.3,1e-5)
 U = np.ones_like(T)
