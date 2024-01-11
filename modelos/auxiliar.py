@@ -1,8 +1,3 @@
-"""
-Módulo auxiliar da biblioteca control
-
-Trabalho Futuro - Refatorar de acordo com as convençoes da biblioteca, usando herança e polimorfismo
-"""
 import numpy as np              # NumPy library
 
 # Helper function for checking array-like parameters

@@ -4,13 +4,8 @@ import numpy as np
 import pandas as pd
 import edo
 
-<<<<<<< HEAD
 # # Simulação do Modelo Fuzzy T-S com passo 1E-5
-
-# conversor = conversores_cc_basicos.Buck_ideal_entrada(Vo=12, L=700e-6, C=500e-6, Iin=10, Rp=10)
-=======
-conversor = conversores_cc_basicos.Buck_ideal_entrada(Vo=12, L=700e-6, C=500e-6, Iin=10, Rp=10)
->>>>>>> c250c0896e94b9e3199abbe0f2b475bee425a474
+conversor = conversores_cc_basicos.Buck_PV(Vo=12, L=700e-6, C=500e-6, Iin=10, Rp=10)
 
 T = np.arange(0,0.3,1e-5)
 U = np.ones_like(T)
@@ -31,7 +26,7 @@ for i in range(int(len(T)/5)):
 
 # Simulação do PSIM com passo 1E-6 ---------------------------------------------------------------
 
-df = pd.read_fwf('buck.txt')
+df = pd.read_fwf('simu/buck.txt')
 #print(df.head())
 
 tempo = df[['Time']].to_numpy()
@@ -56,7 +51,7 @@ times = np.arange(t_limites[0], t_limites[1]+t_passo, t_passo)
 
 rtol = 1e-6
 
-solution = edo.solve_ivp(edo.buck_PV_linear_modelo_medio, t_limites, C0, t_eval = times, rtol=rtol, args=(12, 10, 100e-6, 500e-6, 10))
+solution = edo.solve_ivp(edo.buck_PV_linear, t_limites, C0, t_eval = times, rtol=rtol, args=(12, 10, 100e-6, 500e-6, 10))
 t = solution.t
 iL = solution.y[0]
 vpv = solution.y[1]
