@@ -364,7 +364,7 @@ class Buck_PV:
         self._L = L
         self._Iin = Iin
         self._Rp = Rp
-    def forced_response_TS(self, d_t, d_min, d_max, T=None, U=0., X0=0., transpose=False, interpolate=False, return_x=None, squeeze=None):
+    def forced_response_TS(self, d_t, d_min, d_max, il_simu, vcin_simu, T=None, U=0., X0=0., transpose=False):
 
         """
         Método para gerar a resposta em malha aberta do modelo TS do Buck-Boost operando em várias regiões de operação
@@ -380,18 +380,18 @@ class Buck_PV:
         :return: Resultado da simulação: x, y
         """
         # máximos e mínimos considerando os valores genéricos
-        # a11 = -2400; a12 = -6000
-        a11 = -342.8571; a12 = -857.1429 #Vo=12, L=700e-6, C=500e-6, Iin=10, Rp=10
-        a21 = 1500.0038; a22 = 960.0015
-        # b31 = 500e3; b32 = 200e3
-        b31 = 29761.8571; b32 = 19047.5743 #Vo=12, L=700e-6, C=500e-6, Iin=10, Rp=10
-        b41 = -26666.6666; b42 = -41666.6666
+        # # a11 = -2400; a12 = -6000
+        # a11 = -342.8571; a12 = -857.1429 #Vo=12, L=700e-6, C=500e-6, Iin=10, Rp=10
+        # a21 = 1500.0038; a22 = 960.0015
+        # # b31 = 500e3; b32 = 200e3
+        # b31 = 29761.8571; b32 = 19047.5743 #Vo=12, L=700e-6, C=500e-6, Iin=10, Rp=10
+        # b41 = -26666.6666; b42 = -41666.6666
 
         # # máximos e mínimos considerando os valores de projeto
-        # a11 = -10855.3078 ; a12 = -27138.2695
-        # a21 = 533.3367; a22 = 296.2963
-        # b31 = 2261522.4570; b32 = 904608.9828
-        # b41 = -1929; b42 = -3472.2222
+        a11 = -10855.3078 ; a12 = -27138.2695
+        a21 = 533.3367; a22 = 296.2963
+        b31 = 2261522.4570; b32 = 904608.9828
+        b41 = -1929; b42 = -3472.2222
 
         print(f'min(z1) = a12 = {a12} max(z1) = a11 = {a11}')
         print(f'min(z2) = a22 = {a22} max(z2) = a21 = {a21}')
@@ -493,8 +493,8 @@ class Buck_PV:
         # -------------------------------------------------------------------------------------------------------------
         # Laço principal
         for i in range(1, n_steps):
-            Il = self._Iin/d_t[i] - self._Vo/(pow(d_t[i], 2) * self._Rp)
-            Vcin = self._Vo/d_t[i]
+            Il = il_simu[i]
+            Vcin = vcin_simu[i]
 
             if Vcin == 0:
                 z1 = -self._Vo / (self._L * 0.01)
